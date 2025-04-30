@@ -48,7 +48,24 @@ app.options("/users", (req: Request, res: Response) => {
 
 function loadUsersFromFile(): User[] {
   const filePath = path.join(__dirname, "users.json");
-  if (!fs.existsSync(filePath)) return [];
+  if (!fs.existsSync(filePath)) {
+    const defaultUser: User = {
+      id: randomUUID(),
+      username: "defaultuser",
+      preferences: {
+        darkMode: false,
+        communicationPreferences: {
+          text: false,
+          email: false,
+          phone: false
+        },
+        favoriteColors: []
+      }
+    };
+    const defaultUsers = [defaultUser];
+    fs.writeFileSync(filePath, JSON.stringify(defaultUsers, null, 2), "utf-8");
+    return defaultUsers;
+  }
   const data = fs.readFileSync(filePath, "utf-8");
   try {
     return JSON.parse(data);
