@@ -1,4 +1,4 @@
 dist
 node_modules
 .env
-users.json
+src/users.json
