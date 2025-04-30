@@ -3,7 +3,7 @@
     "id": "776f81cc-a072-4b27-b8df-e225ad27b72e",
     "username": "alice",
     "preferences": {
-      "darkMode": false,
+      "darkMode": true,
       "communicationPreferences": {
         "text": false,
         "email": true,
@@ -28,6 +28,36 @@
       "favoriteColors": [
         "red",
         "yellow"
+      ]
+    }
+  },
+  {
+    "id": "95554de1-5104-40e9-974a-65070b4f2a7e",
+    "username": "Stutson",
+    "preferences": {
+      "darkMode": true,
+      "communicationPreferences": {
+        "text": true,
+        "email": true,
+        "phone": true
+      },
+      "favoriteColors": [
+        "red"
+      ]
+    }
+  },
+  {
+    "id": "119101a3-1ffd-4db2-a45b-b529fe37ed91",
+    "username": "Stutson",
+    "preferences": {
+      "darkMode": true,
+      "communicationPreferences": {
+        "text": true,
+        "email": true,
+        "phone": true
+      },
+      "favoriteColors": [
+        "red"
       ]
     }
   }
