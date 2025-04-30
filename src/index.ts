@@ -14,7 +14,7 @@ interface User {
 }
 
 interface Preferences {
-  lightdark: boolean;
+  darkMode: boolean;
   communicationPreferences: CommunicationPreferences;
   favoriteColors: string[];
 }
@@ -30,7 +30,7 @@ const users: User[] = [
     id: randomUUID(),
     username: "alice",
     preferences: {
-      lightdark: true,
+      darkMode: true,
       communicationPreferences: {
         text: false,
         email: true,
@@ -43,7 +43,7 @@ const users: User[] = [
     id: randomUUID(),
     username: "bob",
     preferences: {
-      lightdark: false,
+      darkMode: false,
       communicationPreferences: {
         text: true,
         email: false,
@@ -90,11 +90,11 @@ app.post("/users", (req: Request, res: Response) => {
       throw new Error("'username' is required and must be a non-empty string.");
     }
     if (!preferences || typeof preferences !== "object") {
-      throw new Error("'preferences' is required and must be an object with the following fields: lightdark (boolean), communicationPreferences (object), favoriteColors (array of strings). communicationPreferences must include text, email, and phone (all booleans).");
+      throw new Error("'preferences' is required and must be an object with the following fields: darkMode (boolean), communicationPreferences (object), favoriteColors (array of strings). communicationPreferences must include text, email, and phone (all booleans).");
     }
-    const { lightdark, communicationPreferences, favoriteColors } = preferences;
+    const { darkMode, communicationPreferences, favoriteColors } = preferences;
     if (
-      typeof lightdark !== "boolean" ||
+      typeof darkMode !== "boolean" ||
       !communicationPreferences || typeof communicationPreferences !== "object" ||
       typeof communicationPreferences.text !== "boolean" ||
       typeof communicationPreferences.email !== "boolean" ||
@@ -102,7 +102,7 @@ app.post("/users", (req: Request, res: Response) => {
       !Array.isArray(favoriteColors) ||
       !favoriteColors.every((c: any) => typeof c === "string")
     ) {
-      throw new Error("'preferences' must include: lightdark (boolean), communicationPreferences (object with text, email, phone as booleans), favoriteColors (array of strings). ");
+      throw new Error("'preferences' must include: darkMode (boolean), communicationPreferences (object with text, email, phone as booleans), favoriteColors (array of strings). ");
     }
     const newUser: User = {
       id: randomUUID(),
@@ -121,7 +121,7 @@ app.post("/users", (req: Request, res: Response) => {
       requirements: {
         username: "string (required, non-empty)",
         preferences: {
-          lightdark: "boolean (required)",
+          darkMode: "boolean (required)",
           communicationPreferences: {
             text: "boolean (required)",
             email: "boolean (required)",
@@ -151,16 +151,16 @@ app.patch("/users/:id/preferences", (req: Request, res: Response) => {
   const { preferences } = req.body;
   if (!preferences || typeof preferences !== "object") {
     res.status(400).json({
-      error: "'preferences' is required and must be an object with any of the following fields: lightdark (boolean), communicationPreferences (object), favoriteColors (array of strings)."
+      error: "'preferences' is required and must be an object with any of the following fields: darkMode (boolean), communicationPreferences (object), favoriteColors (array of strings)."
     });
     return;
   }
-  if (preferences.lightdark !== undefined) {
-    if (typeof preferences.lightdark !== "boolean") {
-      res.status(400).json({ error: "'lightdark' must be a boolean." });
+  if (preferences.darkMode !== undefined) {
+    if (typeof preferences.darkMode !== "boolean") {
+      res.status(400).json({ error: "'darkMode' must be a boolean." });
       return;
     }
-    user.preferences.lightdark = preferences.lightdark;
+    user.preferences.darkMode = preferences.darkMode;
   }
   if (preferences.favoriteColors !== undefined) {
     if (!Array.isArray(preferences.favoriteColors) || !preferences.favoriteColors.every((c: any) => typeof c === "string")) {
