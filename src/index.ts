@@ -172,6 +172,24 @@ app.patch("/users/:id/preferences", (req: Request, res: Response) => {
   saveUsersToFile();
   res.json({ message: "Preferences updated successfully.", user });
 });
+app.options("/users/:id", (req: Request, res: Response) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+  res.header("Access-Control-Allow-Headers", "*");
+  res.send();
+});
+
+app.delete("/users/:id", (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userIndex = users.findIndex(u => u.id === id);
+  if (userIndex === -1) {
+    res.status(404).json({ error: "User not found." });
+    return 
+  }
+  users.splice(userIndex, 1);
+  saveUsersToFile();
+  res.json({ message: "User deleted successfully." });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
