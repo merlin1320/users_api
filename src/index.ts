@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, {Request, Response} from "express";
 import cors from "cors";
 import { randomUUID } from "crypto";
 
@@ -16,7 +16,7 @@ interface Preferences {
   text: boolean;
   email: boolean;
   phone: boolean;
-  favoriteColors: string[];
+  favoriteColors: string[]; 
 }
 
 const users: User[] = [
@@ -119,20 +119,23 @@ app.patch("/users/:id/preferences", (req: Request, res: Response) => {
   const { id } = req.params;
   const user = users.find(u => u.id === id);
   if (!user) {
-    return res.status(404).json({ error: "User not found." });
+    res.status(404).json({ error: "User not found." });
+    return 
   }
   const { preferences } = req.body;
   if (!preferences || typeof preferences !== "object") {
-    return res.status(400).json({
+    res.status(400).json({
       error: "'preferences' is required and must be an object with any of the following fields: lightdark (boolean), text (boolean), email (boolean), phone (boolean), favoriteColors (array of strings)."
     });
+    return 
   }
   const allowedFields = ["lightdark", "text", "email", "phone", "favoriteColors"];
   for (const key of Object.keys(preferences)) {
     if (!allowedFields.includes(key)) continue;
     if (key === "favoriteColors") {
       if (!Array.isArray(preferences[key]) || !preferences[key].every((c: any) => typeof c === "string")) {
-        return res.status(400).json({ error: "'favoriteColors' must be an array of strings." });
+        res.status(400).json({ error: "'favoriteColors' must be an array of strings." });
+        return 
       }
     }
     // @ts-ignore
