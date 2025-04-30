@@ -74,6 +74,10 @@ app.post("/users", (req: Request, res: Response) => {
     if (!username || typeof username !== "string" || username.trim() === "") {
       throw new Error("'username' is required and must be a non-empty string.");
     }
+    // Check if username already exists (case-insensitive)
+    if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+      throw new Error("That username is already taken.");
+    }
     // Provide default preferences if not given
     const defaultPreferences: Preferences = {
       darkMode: false,
