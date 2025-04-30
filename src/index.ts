@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 
 const app = express();
-const port = 3000;
+const port = 3020;
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, Express with TypeScript!");
