@@ -3,7 +3,7 @@
     "id": "776f81cc-a072-4b27-b8df-e225ad27b72e",
     "username": "alice",
     "preferences": {
-      "darkMode": true,
+      "darkMode": false,
       "communicationPreferences": {
         "text": false,
         "email": true,
