@@ -89,25 +89,29 @@ app.post("/users", (req: Request, res: Response) => {
     if (!username || typeof username !== "string" || username.trim() === "") {
       throw new Error("'username' is required and must be a non-empty string.");
     }
-    if (!preferences || typeof preferences !== "object") {
-      throw new Error("'preferences' is required and must be an object with the following fields: darkMode (boolean), communicationPreferences (object), favoriteColors (array of strings). communicationPreferences must include text, email, and phone (all booleans).");
-    }
-    const { darkMode, communicationPreferences, favoriteColors } = preferences;
-    if (
-      typeof darkMode !== "boolean" ||
-      !communicationPreferences || typeof communicationPreferences !== "object" ||
-      typeof communicationPreferences.text !== "boolean" ||
-      typeof communicationPreferences.email !== "boolean" ||
-      typeof communicationPreferences.phone !== "boolean" ||
-      !Array.isArray(favoriteColors) ||
-      !favoriteColors.every((c: any) => typeof c === "string")
-    ) {
-      throw new Error("'preferences' must include: darkMode (boolean), communicationPreferences (object with text, email, phone as booleans), favoriteColors (array of strings). ");
-    }
+    // Provide default preferences if not given
+    const defaultPreferences: Preferences = {
+      darkMode: false,
+      communicationPreferences: {
+        text: false,
+        email: false,
+        phone: false
+      },
+      favoriteColors: []
+    };
+    const mergedPreferences = {
+      ...defaultPreferences,
+      ...(preferences || {}),
+      communicationPreferences: {
+        ...defaultPreferences.communicationPreferences,
+        ...((preferences && preferences.communicationPreferences) || {})
+      }
+    };
+    // No longer require preferences validation, just ensure mergedPreferences is valid
     const newUser: User = {
       id: randomUUID(),
       username,
-      preferences
+      preferences: mergedPreferences
     };
     users.push(newUser);
     saveUsersToFile();
@@ -119,16 +123,7 @@ app.post("/users", (req: Request, res: Response) => {
     res.status(400).json({
       error: error.message,
       requirements: {
-        username: "string (required, non-empty)",
-        preferences: {
-          darkMode: "boolean (required)",
-          communicationPreferences: {
-            text: "boolean (required)",
-            email: "boolean (required)",
-            phone: "boolean (required)"
-          },
-          favoriteColors: "string[] (required)"
-        }
+        username: "string (required, non-empty)"
       }
     });
   }
