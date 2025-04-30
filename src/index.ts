@@ -25,35 +25,6 @@ interface CommunicationPreferences {
   phone: boolean;
 }
 
-const users: User[] = [
-  {
-    id: randomUUID(),
-    username: "alice",
-    preferences: {
-      darkMode: true,
-      communicationPreferences: {
-        text: false,
-        email: true,
-        phone: false
-      },
-      favoriteColors: ["blue", "green"]
-    }
-  },
-  {
-    id: randomUUID(),
-    username: "bob",
-    preferences: {
-      darkMode: false,
-      communicationPreferences: {
-        text: true,
-        email: false,
-        phone: true
-      },
-      favoriteColors: ["red", "yellow"]
-    }
-  }
-];
-
 const corsOptions = {
   origin: "*", // Allow all origins (not recommended for production)
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -73,6 +44,20 @@ app.options("/users", (req: Request, res: Response) => {
   res.header("Access-Control-Allow-Headers", "*");
   res.send();
 });
+
+function loadUsersFromFile(): User[] {
+  const filePath = path.join(__dirname, "users.json");
+  if (!fs.existsSync(filePath)) return [];
+  const data = fs.readFileSync(filePath, "utf-8");
+  try {
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+}
+
+// Global users array loaded from users.json
+let users: User[] = loadUsersFromFile();
 
 app.get("/users", (req: Request, res: Response) => {
   res.json(users);
@@ -131,7 +116,7 @@ app.post("/users", (req: Request, res: Response) => {
 
 app.options("/users/:id/preferences", (req: Request, res: Response) => {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, DELETE");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
   res.header("Access-Control-Allow-Headers", "*");
   res.send();
 });
