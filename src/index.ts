@@ -175,7 +175,7 @@ app.patch("/users/:id/preferences", (req: Request, res: Response) => {
       res.status(400).json({ error: "'communicationPreferences' must be an object." });
       return;
     }
-    ["text", "email", "phone"].forEach((key) => {
+    (["text", "email", "phone"] as (keyof CommunicationPreferences)[]).forEach((key) => {
       if (cp[key] !== undefined) {
         if (typeof cp[key] !== "boolean") {
           res.status(400).json({ error: `'${key}' in communicationPreferences must be a boolean.` });
