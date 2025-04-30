@@ -3,6 +3,7 @@ import cors from "cors";
 import { randomUUID } from "crypto";
 import fs from "fs";
 import path from "path";
+import { log } from "console";
 
 const app = express();
 const port = 3020;
@@ -40,7 +41,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.options("/users", (req: Request, res: Response) => {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, DELETE");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
   res.header("Access-Control-Allow-Headers", "*");
   res.send();
 });
@@ -181,13 +182,18 @@ app.options("/users/:id", (req: Request, res: Response) => {
 
 app.delete("/users/:id", (req: Request, res: Response) => {
   const { id } = req.params;
-  const userIndex = users.findIndex(u => u.id === id);
-  if (userIndex === -1) {
+  console.log("Attempting to delete user with id:", id);
+  console.log("Current user ids:", users.map(u => u.id));
+  // Filter out the user to delete
+  const updatedUsers = users.filter(u => u.id !== id);
+  if (updatedUsers.length === users.length) {
+    console.log("User not found. Cannot delete.");
     res.status(404).json({ error: "User not found." });
     return 
   }
-  users.splice(userIndex, 1);
+  users = updatedUsers;
   saveUsersToFile();
+  console.log("User deleted successfully.");
   res.json({ message: "User deleted successfully." });
 });
 
