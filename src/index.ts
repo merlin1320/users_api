@@ -1,6 +1,8 @@
 import express, {Request, Response} from "express";
 import cors from "cors";
 import { randomUUID } from "crypto";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 const port = 3020;
@@ -13,10 +15,14 @@ interface User {
 
 interface Preferences {
   lightdark: boolean;
+  communicationPreferences: CommunicationPreferences;
+  favoriteColors: string[];
+}
+
+interface CommunicationPreferences {
   text: boolean;
   email: boolean;
   phone: boolean;
-  favoriteColors: string[]; 
 }
 
 const users: User[] = [
@@ -25,9 +31,11 @@ const users: User[] = [
     username: "alice",
     preferences: {
       lightdark: true,
-      text: false,
-      email: true,
-      phone: false,
+      communicationPreferences: {
+        text: false,
+        email: true,
+        phone: false
+      },
       favoriteColors: ["blue", "green"]
     }
   },
@@ -36,9 +44,11 @@ const users: User[] = [
     username: "bob",
     preferences: {
       lightdark: false,
-      text: true,
-      email: false,
-      phone: true,
+      communicationPreferences: {
+        text: true,
+        email: false,
+        phone: true
+      },
       favoriteColors: ["red", "yellow"]
     }
   }
@@ -68,6 +78,11 @@ app.get("/users", (req: Request, res: Response) => {
   res.json(users);
 });
 
+function saveUsersToFile() {
+  const filePath = path.join(__dirname, "users.json");
+  fs.writeFileSync(filePath, JSON.stringify(users, null, 2), "utf-8");
+}
+
 app.post("/users", (req: Request, res: Response) => {
   try {
     const { username, preferences } = req.body;
@@ -75,18 +90,19 @@ app.post("/users", (req: Request, res: Response) => {
       throw new Error("'username' is required and must be a non-empty string.");
     }
     if (!preferences || typeof preferences !== "object") {
-      throw new Error("'preferences' is required and must be an object with the following fields: lightdark (boolean), text (boolean), email (boolean), phone (boolean), favoriteColors (array of strings).");
+      throw new Error("'preferences' is required and must be an object with the following fields: lightdark (boolean), communicationPreferences (object), favoriteColors (array of strings). communicationPreferences must include text, email, and phone (all booleans).");
     }
-    const { lightdark, text, email, phone, favoriteColors } = preferences;
+    const { lightdark, communicationPreferences, favoriteColors } = preferences;
     if (
       typeof lightdark !== "boolean" ||
-      typeof text !== "boolean" ||
-      typeof email !== "boolean" ||
-      typeof phone !== "boolean" ||
+      !communicationPreferences || typeof communicationPreferences !== "object" ||
+      typeof communicationPreferences.text !== "boolean" ||
+      typeof communicationPreferences.email !== "boolean" ||
+      typeof communicationPreferences.phone !== "boolean" ||
       !Array.isArray(favoriteColors) ||
       !favoriteColors.every((c: any) => typeof c === "string")
     ) {
-      throw new Error("'preferences' must include: lightdark (boolean), text (boolean), email (boolean), phone (boolean), favoriteColors (array of strings).");
+      throw new Error("'preferences' must include: lightdark (boolean), communicationPreferences (object with text, email, phone as booleans), favoriteColors (array of strings). ");
     }
     const newUser: User = {
       id: randomUUID(),
@@ -94,6 +110,7 @@ app.post("/users", (req: Request, res: Response) => {
       preferences
     };
     users.push(newUser);
+    saveUsersToFile();
     res.status(201).json({
       message: "User created successfully.",
       user: newUser
@@ -105,9 +122,11 @@ app.post("/users", (req: Request, res: Response) => {
         username: "string (required, non-empty)",
         preferences: {
           lightdark: "boolean (required)",
-          text: "boolean (required)",
-          email: "boolean (required)",
-          phone: "boolean (required)",
+          communicationPreferences: {
+            text: "boolean (required)",
+            email: "boolean (required)",
+            phone: "boolean (required)"
+          },
           favoriteColors: "string[] (required)"
         }
       }
@@ -115,31 +134,56 @@ app.post("/users", (req: Request, res: Response) => {
   }
 });
 
+app.options("/users/:id/preferences", (req: Request, res: Response) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, DELETE");
+  res.header("Access-Control-Allow-Headers", "*");
+  res.send();
+});
+
 app.patch("/users/:id/preferences", (req: Request, res: Response) => {
   const { id } = req.params;
   const user = users.find(u => u.id === id);
   if (!user) {
     res.status(404).json({ error: "User not found." });
-    return 
+    return;
   }
   const { preferences } = req.body;
   if (!preferences || typeof preferences !== "object") {
     res.status(400).json({
-      error: "'preferences' is required and must be an object with any of the following fields: lightdark (boolean), text (boolean), email (boolean), phone (boolean), favoriteColors (array of strings)."
+      error: "'preferences' is required and must be an object with any of the following fields: lightdark (boolean), communicationPreferences (object), favoriteColors (array of strings)."
     });
-    return 
+    return;
   }
-  const allowedFields = ["lightdark", "text", "email", "phone", "favoriteColors"];
-  for (const key of Object.keys(preferences)) {
-    if (!allowedFields.includes(key)) continue;
-    if (key === "favoriteColors") {
-      if (!Array.isArray(preferences[key]) || !preferences[key].every((c: any) => typeof c === "string")) {
-        res.status(400).json({ error: "'favoriteColors' must be an array of strings." });
-        return 
-      }
+  if (preferences.lightdark !== undefined) {
+    if (typeof preferences.lightdark !== "boolean") {
+      res.status(400).json({ error: "'lightdark' must be a boolean." });
+      return;
     }
-    // @ts-ignore
-    user.preferences[key] = preferences[key];
+    user.preferences.lightdark = preferences.lightdark;
+  }
+  if (preferences.favoriteColors !== undefined) {
+    if (!Array.isArray(preferences.favoriteColors) || !preferences.favoriteColors.every((c: any) => typeof c === "string")) {
+      res.status(400).json({ error: "'favoriteColors' must be an array of strings." });
+      return;
+    }
+    user.preferences.favoriteColors = preferences.favoriteColors;
+  }
+  if (preferences.communicationPreferences !== undefined) {
+    const cp = preferences.communicationPreferences;
+    if (typeof cp !== "object" || cp === null) {
+      res.status(400).json({ error: "'communicationPreferences' must be an object." });
+      return;
+    }
+    ["text", "email", "phone"].forEach((key) => {
+      if (cp[key] !== undefined) {
+        if (typeof cp[key] !== "boolean") {
+          res.status(400).json({ error: `'${key}' in communicationPreferences must be a boolean.` });
+          return;
+        }
+        user.preferences.communicationPreferences[key] = cp[key];
+      }
+    });
   }
   res.json({ message: "Preferences updated successfully.", user });
 });
