@@ -185,6 +185,7 @@ app.patch("/users/:id/preferences", (req: Request, res: Response) => {
       }
     });
   }
+  saveUsersToFile();
   res.json({ message: "Preferences updated successfully.", user });
 });
 

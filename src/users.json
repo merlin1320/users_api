@@ -1,6 +1,6 @@
 [
   {
-    "id": "7c2332dc-1ad8-4e03-89b5-fef6b658c90b",
+    "id": "1e788edf-0205-4ee3-8950-a4a776c1589d",
     "username": "alice",
     "preferences": {
       "darkMode": true,
@@ -16,7 +16,7 @@
     }
   },
   {
-    "id": "23d33ad4-5989-482f-bea5-2b32bbc4b8d0",
+    "id": "7d52e87c-9995-4fc4-9d1e-0d1e787df988",
     "username": "bob",
     "preferences": {
       "darkMode": false,
@@ -32,10 +32,10 @@
     }
   },
   {
-    "id": "2d19e2cb-6207-4cc9-88d9-982e4117a86a",
+    "id": "0823d203-e350-4060-b1ba-1b4df41ba8e4",
     "username": "Stutson",
     "preferences": {
-      "lightdark": true,
+      "darkMode": true,
       "communicationPreferences": {
         "text": true,
         "email": true,
